@@ -1,6 +1,7 @@
 package Renderers;
 
 import functions.LinearFunction;
+import functions.QuadraticFunction;
 import global.AbstractRenderer;
 import lwjglutils.OGLTextRenderer;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
@@ -139,7 +140,7 @@ public class Renderer extends AbstractRenderer {
         // Nastavení projekční matice
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(-1, 1, -1, 1, 1, -1); // Upraveno rozsah osy y
+        glOrtho(-10, 10, -10, 10, 10, -10); // Upraveno rozsah osy y
 
 
         initGrid();
@@ -147,16 +148,12 @@ public class Renderer extends AbstractRenderer {
         if (!points.isEmpty()) {
             drawPoints();
         }
-//gm
-        final String regexLinear = "^\\s*y\\s*=\\s*([+-]?\\s*\\d*\\.?\\d*)\\s*\\*?\\s*x\\s*([+-]?\\s*\\d+\\.?\\d*)?\\s*$";
 
-        Pattern pattern = Pattern.compile(regexLinear);
+        Pattern pattern = Pattern.compile(LinearFunction.regex);
         Matcher matcher = pattern.matcher(text);
 
         if (matcher.matches() && isConfirmed) {
             double a;
-
-
 
             if (matcher.group(1) == null || matcher.group(1).isEmpty()) {
                 a = 1.0;
@@ -176,17 +173,43 @@ public class Renderer extends AbstractRenderer {
             } else {
                 b = Double.parseDouble(matcher.group(2).replace(" ", ""));
             }
+            drawLinear(a, b);
+        }
 
-            LinearFunction linearFunction = new LinearFunction(a, b);
+        Pattern patternQuadratic = Pattern.compile(QuadraticFunction.regex);
+        Matcher matcherQuadratic = patternQuadratic.matcher(text);
 
-            glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
-            glBegin(GL_LINE_STRIP);
+        if(matcherQuadratic.matches() && isConfirmed) {
+            double a;
 
-            for (double x = -1; x <= 1d; x += 0.1d) {
-                double y = linearFunction.value(x);
-                glVertex2d(x, y);
+            if (matcherQuadratic.group(1) == null || matcherQuadratic.group(1).isEmpty()) {
+                a = 1.0;
+            } else {
+                String value = (matcherQuadratic.group(1).replace(" ", ""));
+                if(matcherQuadratic.group(1).toString().equals("-")) {
+                    a = - 1.0;
+                } else {
+                    a = Double.parseDouble(value);
+                }
             }
-            glEnd();
+
+            double b;
+
+            if (matcherQuadratic.group(2) == null || matcherQuadratic.group(2).isEmpty()) {
+                b = 0;
+            } else {
+                b = Double.parseDouble(matcherQuadratic.group(2).replace(" ", ""));
+            }
+
+            double c;
+
+            if (matcherQuadratic.group(3) == null || matcherQuadratic.group(3).isEmpty()) {
+                c = 0;
+            } else {
+                c = Double.parseDouble(matcherQuadratic.group(3).replace(" ", ""));
+            }
+
+            drawQuadratic(a, b, c);
         }
 
 
@@ -201,24 +224,24 @@ public class Renderer extends AbstractRenderer {
         glColor3f(0.2f, 0.2f, 0.2f);
 
         // vodorovné čáry mřížky
-        for (float i = -1.0f * scale; i <= 1.0f * scale; i += 0.1f * scale) {
-            glVertex2f(-1.0f * scale, i);
-            glVertex2f(1.0f * scale, i);
+        for (float i = -10.0f * scale; i <= 10.0f * scale; i += 1f * scale) {
+            glVertex2f(-10.0f * scale, i);
+            glVertex2f(10.0f * scale, i);
         }
 
         // svislé čáry mřížky
-        for (float i = -1.0f * scale; i <= 1.0f * scale; i += 0.1f * scale) {
-            glVertex2f(i, -1.0f * scale);
-            glVertex2f(i, 1.0f * scale);
+        for (float i = -10.0f * scale; i <= 10.0f * scale; i += 1f * scale) {
+            glVertex2f(i, -10.0f * scale);
+            glVertex2f(i, 10.0f * scale);
         }
 
         // osa Y a X
         glColor3f(1f, 1f, 1f);
-        glVertex2f(-1 * scale, 0);
-        glVertex2f(1 * scale, 0);
+        glVertex2f(-10 * scale, 0);
+        glVertex2f(10 * scale, 0);
 
-        glVertex2f(0, 1 * scale);
-        glVertex2f(0, -1 * scale);
+        glVertex2f(0, 10 * scale);
+        glVertex2f(0, -10 * scale);
 
         // glColor3f(0.5f, 0.5f, 0.5f);
 
@@ -249,10 +272,6 @@ public class Renderer extends AbstractRenderer {
 
     }
 
-    private Vec2D normalize(Vec2D v) {
-        return new Vec2D((2 * v.getX() / width - 1), (1 - 2 * v.getY() / height));
-    }
-
     private void initKeys()
     {
         keyToCharMap.put(GLFW_KEY_EQUAL, '=');
@@ -260,6 +279,8 @@ public class Renderer extends AbstractRenderer {
         keyToCharMap.put(GLFW_KEY_KP_ADD, '+');
         keyToCharMap.put(GLFW_KEY_KP_SUBTRACT, '-');
         keyToCharMap.put(GLFW_KEY_KP_MULTIPLY, '*');
+        keyToCharMap.put(GLFW_KEY_PERIOD, '.');
+        keyToCharMap.put(GLFW_KEY_GRAVE_ACCENT, '^');
 
         // Přidat čísla
         keyToCharMap.put(GLFW_KEY_0, '0');
@@ -282,8 +303,35 @@ public class Renderer extends AbstractRenderer {
         keyToCharMap.put(GLFW_KEY_KP_7, '7');
         keyToCharMap.put(GLFW_KEY_KP_8, '8');
         keyToCharMap.put(GLFW_KEY_KP_9, '9');
-        keyToCharMap.put(GLFW_KEY_PERIOD, '.');
 
+
+    }
+
+    private void drawQuadratic(double a, double  b, double c) {
+        QuadraticFunction quadraticFunction = new QuadraticFunction(a, b, c);
+
+        glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
+        glBegin(GL_LINE_STRIP);
+
+        for (double x = -10; x <= 10d; x += 1d) {
+            double y = quadraticFunction.value(x);
+            glVertex2d(x, y);
+        }
+        glEnd();
+    }
+
+    private void drawLinear(double a, double b) {
+
+        LinearFunction linearFunction = new LinearFunction(a, b);
+
+        glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
+        glBegin(GL_LINE_STRIP);
+
+        for (double x = -10; x <= 10d; x += 1d) {
+            double y = linearFunction.value(x);
+            glVertex2d(x, y);
+        }
+        glEnd();
     }
 
 }
