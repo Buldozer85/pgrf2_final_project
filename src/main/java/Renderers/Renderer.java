@@ -53,34 +53,7 @@ public class Renderer extends AbstractRenderer {
 
     public Renderer() {
         super();
-
-        keyToCharMap.put(GLFW_KEY_EQUAL, '=');
-        keyToCharMap.put(GLFW_KEY_MINUS, '-');
-        keyToCharMap.put(GLFW_KEY_KP_ADD, '+');
-        keyToCharMap.put(GLFW_KEY_KP_SUBTRACT, '-');
-        keyToCharMap.put(GLFW_KEY_KP_MULTIPLY, '*');
-
-        // Přidat čísla
-        keyToCharMap.put(GLFW_KEY_0, '0');
-        keyToCharMap.put(GLFW_KEY_1, '1');
-        keyToCharMap.put(GLFW_KEY_2, '2');
-        keyToCharMap.put(GLFW_KEY_3, '3');
-        keyToCharMap.put(GLFW_KEY_4, '4');
-        keyToCharMap.put(GLFW_KEY_5, '5');
-        keyToCharMap.put(GLFW_KEY_6, '6');
-        keyToCharMap.put(GLFW_KEY_7, '7');
-        keyToCharMap.put(GLFW_KEY_8, '8');
-        keyToCharMap.put(GLFW_KEY_9, '9');
-        keyToCharMap.put(GLFW_KEY_KP_0, '0');
-        keyToCharMap.put(GLFW_KEY_KP_1, '1');
-        keyToCharMap.put(GLFW_KEY_KP_2, '2');
-        keyToCharMap.put(GLFW_KEY_KP_3, '3');
-        keyToCharMap.put(GLFW_KEY_KP_4, '4');
-        keyToCharMap.put(GLFW_KEY_KP_5, '5');
-        keyToCharMap.put(GLFW_KEY_KP_6, '6');
-        keyToCharMap.put(GLFW_KEY_KP_7, '7');
-        keyToCharMap.put(GLFW_KEY_KP_8, '8');
-        keyToCharMap.put(GLFW_KEY_KP_9, '9');
+       initKeys();
 
         glfwWindowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
@@ -147,8 +120,6 @@ public class Renderer extends AbstractRenderer {
                         text += keyToCharMap.get(i);
                     }
                 }
-
-                System.out.println(text);
             }
         };
     }
@@ -185,15 +156,22 @@ public class Renderer extends AbstractRenderer {
         if (matcher.matches() && isConfirmed) {
             double a;
 
-            if (matcher.group(1).isEmpty()) {
+
+
+            if (matcher.group(1) == null || matcher.group(1).isEmpty()) {
                 a = 1.0;
             } else {
-                a = Double.parseDouble(matcher.group(1).replace(" ", ""));
+                String value = (matcher.group(1).replace(" ", ""));
+                if(matcher.group(1).toString().equals("-")) {
+                    a = - 1.0;
+                } else {
+                    a = Double.parseDouble(value);
+                }
             }
 
             double b;
 
-            if (matcher.group(1).isEmpty()) {
+            if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
                 b = 0;
             } else {
                 b = Double.parseDouble(matcher.group(2).replace(" ", ""));
@@ -201,31 +179,11 @@ public class Renderer extends AbstractRenderer {
 
             LinearFunction linearFunction = new LinearFunction(a, b);
 
-
-            // Vykreslení grafu funkce
             glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
             glBegin(GL_LINE_STRIP);
-            double maxY = Double.NEGATIVE_INFINITY;
-            double minY = Double.POSITIVE_INFINITY;
 
-// Vypočítání maximální a minimální hodnoty y
-/*
-            for (double x = X_MIN; x <= X_MAX; x += STEP) {
-                double y = linearFunction.value(x);
-                if (y > maxY) {
-                    maxY = y;
-                }
-                if (y < minY) {
-                    minY = y;
-                }
-            }
-*/
-
-// Normalizace hodnot y do rozsahu [-1, 1]
-            //double yRange = maxY - minY;
             for (double x = -1; x <= 1d; x += 0.1d) {
-                double y = linearFunction.value(x); // Normalizace do rozsahu [-1, 1]
-                System.out.println(x + "x y:" + y);
+                double y = linearFunction.value(x);
                 glVertex2d(x, y);
             }
             glEnd();
@@ -293,6 +251,39 @@ public class Renderer extends AbstractRenderer {
 
     private Vec2D normalize(Vec2D v) {
         return new Vec2D((2 * v.getX() / width - 1), (1 - 2 * v.getY() / height));
+    }
+
+    private void initKeys()
+    {
+        keyToCharMap.put(GLFW_KEY_EQUAL, '=');
+        keyToCharMap.put(GLFW_KEY_MINUS, '-');
+        keyToCharMap.put(GLFW_KEY_KP_ADD, '+');
+        keyToCharMap.put(GLFW_KEY_KP_SUBTRACT, '-');
+        keyToCharMap.put(GLFW_KEY_KP_MULTIPLY, '*');
+
+        // Přidat čísla
+        keyToCharMap.put(GLFW_KEY_0, '0');
+        keyToCharMap.put(GLFW_KEY_1, '1');
+        keyToCharMap.put(GLFW_KEY_2, '2');
+        keyToCharMap.put(GLFW_KEY_3, '3');
+        keyToCharMap.put(GLFW_KEY_4, '4');
+        keyToCharMap.put(GLFW_KEY_5, '5');
+        keyToCharMap.put(GLFW_KEY_6, '6');
+        keyToCharMap.put(GLFW_KEY_7, '7');
+        keyToCharMap.put(GLFW_KEY_8, '8');
+        keyToCharMap.put(GLFW_KEY_9, '9');
+        keyToCharMap.put(GLFW_KEY_KP_0, '0');
+        keyToCharMap.put(GLFW_KEY_KP_1, '1');
+        keyToCharMap.put(GLFW_KEY_KP_2, '2');
+        keyToCharMap.put(GLFW_KEY_KP_3, '3');
+        keyToCharMap.put(GLFW_KEY_KP_4, '4');
+        keyToCharMap.put(GLFW_KEY_KP_5, '5');
+        keyToCharMap.put(GLFW_KEY_KP_6, '6');
+        keyToCharMap.put(GLFW_KEY_KP_7, '7');
+        keyToCharMap.put(GLFW_KEY_KP_8, '8');
+        keyToCharMap.put(GLFW_KEY_KP_9, '9');
+        keyToCharMap.put(GLFW_KEY_PERIOD, '.');
+
     }
 
 }
