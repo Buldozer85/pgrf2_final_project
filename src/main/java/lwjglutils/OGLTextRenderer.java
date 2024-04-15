@@ -272,12 +272,5 @@ public class OGLTextRenderer {
 	public void draw(){
 	}
 	
-	@Override
-	public void finalize() throws Throwable{
-		super.finalize();
-		viewer.finalize();
-		//if (glIsTexture(textureID))
-		//	glDeleteTextures(textureID);
 
-	}
 }

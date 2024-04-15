@@ -73,6 +73,7 @@ public class Renderer extends AbstractRenderer {
                     width = w;
                     height = h;
                 }
+                    textRenderer.resize(width, height);
             }
         };
 
@@ -85,9 +86,10 @@ public class Renderer extends AbstractRenderer {
                     double[] xPos = new double[1];
                     double[] yPos = new double[1];
                     glfwGetCursorPos(l, xPos, yPos);
+                    System.out.println(xPos[0]);
 
-                    clickedX = (float) (2 * xPos[0] / width - 1);
-                    clickedY = (float) (1 - 2 * yPos[0] / height);
+                    clickedX = (float) (20 * xPos[0] / width - 10);
+                    clickedY = (float) (10 - 20 * yPos[0] / height);
 
                     points.add(new Vec2D(clickedX, clickedY));
 
@@ -126,7 +128,7 @@ public class Renderer extends AbstractRenderer {
                         isConfirmed = true;
 
                     } else {
-                        System.out.println(i);
+
                         if( keyToCharMap.containsKey(i)) {
                             text += keyToCharMap.get(i);
                         }
@@ -147,7 +149,7 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void display() {
-        System.out.println(width + " " + height);
+
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
         // Nastavení projekční matice
@@ -297,7 +299,7 @@ public class Renderer extends AbstractRenderer {
 
         for(double x = X_MIN; x <= X_MAX; x++) {
             textRenderer.addStr2D(start , height / 2 + 20, Integer.toString((int) x));
-            start += 29;
+            start += width / 20;
         }
 
         start = 0;
@@ -307,7 +309,7 @@ public class Renderer extends AbstractRenderer {
                 continue;
             }
             textRenderer.addStr2D(width / 2 + 10 , start, Integer.toString((int) y));
-            start += 22;
+            start += height / 19;
         }
 
 
@@ -456,7 +458,7 @@ public class Renderer extends AbstractRenderer {
 
             if (x > 0) { // Kontrola, zda je x kladné
                 double y = logarithmicFunction.value(x);
-                System.out.println("x:" + x + "y:" + y);
+
                 glVertex2d(x, y);
             }
         }
