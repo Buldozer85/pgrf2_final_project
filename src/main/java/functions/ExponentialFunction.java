@@ -10,7 +10,7 @@ public class ExponentialFunction implements UnivariateFunction {
         this.a = a;
         this.b = b;
     }
-    public static final String regex = "y\\s*=\\s*(\\d*\\.?\\d+)\\s*\\*\\s*e\\^\\(([-+]?\\d*\\.?\\d+)x\\)";
+    public static final String regex = "^y\\s*=\\s*(\\d*\\.?\\d+)\\s*\\*?\\s*e\\^\\(([-+]?\\d*\\.?\\d+)x\\)$";
     @Override
     public double value(double x) {
         return a * Math.exp(b * x);

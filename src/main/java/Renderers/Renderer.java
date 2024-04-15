@@ -1,5 +1,6 @@
 package Renderers;
 
+import functions.ExponentialFunction;
 import functions.LinearFunction;
 import functions.QuadraticFunction;
 import global.AbstractRenderer;
@@ -37,14 +38,19 @@ public class Renderer extends AbstractRenderer {
     private float clickedX = -1;
     private float clickedY = -1;
 
-    private OGLTextRenderer textRenderer;
 
     private ArrayList<Vec2D> points = new ArrayList<>();
 
     private static Map<Integer, Character> keyToCharMap = new HashMap<>();
 
-    private final double X_MIN = -1.0;
-    private final double X_MAX = 1.0;
+    private final double X_MIN = -10.0;
+    private final double X_MAX = 10.0;
+
+    private final double Y_MIN = -10.0;
+    private final double Y_MAX = 10.0;
+
+    private final double Z_MIN = -10.0;
+    private final double Z_MAX = 10.0;
     private final double STEP = 0.1;
 
     private boolean isConfirmed = false;
@@ -81,8 +87,6 @@ public class Renderer extends AbstractRenderer {
 
                     points.add(new Vec2D(clickedX, clickedY));
 
-                    System.out.println("Mouse clicked at: (" + clickedX + ", " + clickedY + ")");
-
                 }
             }
         }; //glfwMouseButtonCallback do nothing
@@ -118,7 +122,10 @@ public class Renderer extends AbstractRenderer {
                         isConfirmed = true;
 
                     } else {
-                        text += keyToCharMap.get(i);
+                        if( keyToCharMap.containsKey(i)) {
+                            text += keyToCharMap.get(i);
+                        }
+
                     }
                 }
             }
@@ -140,10 +147,11 @@ public class Renderer extends AbstractRenderer {
         // Nastavení projekční matice
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(-10, 10, -10, 10, 10, -10); // Upraveno rozsah osy y
+        glOrtho(X_MIN, X_MAX, Y_MIN, Y_MAX, Z_MIN, Z_MAX); // Upraveno rozsah osy y
 
 
         initGrid();
+        drawInputs();
 
         if (!points.isEmpty()) {
             drawPoints();
@@ -212,6 +220,34 @@ public class Renderer extends AbstractRenderer {
             drawQuadratic(a, b, c);
         }
 
+        Pattern patternExponencial = Pattern.compile(ExponentialFunction.regex);
+        Matcher matcherExponencial = patternExponencial.matcher(text);
+
+        if(matcherExponencial.matches() && isConfirmed) {
+            double a;
+
+            if (matcherExponencial.group(1) == null || matcherExponencial.group(1).isEmpty()) {
+                a = 1.0;
+            } else {
+                String value = (matcherExponencial.group(1).replace(" ", ""));
+                if(matcherExponencial.group(1).toString().equals("-")) {
+                    a = - 1.0;
+                } else {
+                    a = Double.parseDouble(value);
+                }
+            }
+
+            double b;
+
+            if (matcherExponencial.group(2) == null || matcherExponencial.group(2).isEmpty()) {
+                b = 0;
+            } else {
+                b = Double.parseDouble(matcherExponencial.group(2).replace(" ", ""));
+            }
+
+            drawExponencial(a, b);
+        }
+
 
         textRenderer.addStr2D(100, 80, text);
         textRenderer.draw();
@@ -224,26 +260,24 @@ public class Renderer extends AbstractRenderer {
         glColor3f(0.2f, 0.2f, 0.2f);
 
         // vodorovné čáry mřížky
-        for (float i = -10.0f * scale; i <= 10.0f * scale; i += 1f * scale) {
-            glVertex2f(-10.0f * scale, i);
-            glVertex2f(10.0f * scale, i);
+        for (float i = (float) (Y_MIN * scale); i <= Y_MAX * scale; i += 1f * scale) {
+            glVertex2f((float) (X_MIN * scale), i);
+            glVertex2f((float) (X_MAX * scale), i);
         }
 
         // svislé čáry mřížky
-        for (float i = -10.0f * scale; i <= 10.0f * scale; i += 1f * scale) {
-            glVertex2f(i, -10.0f * scale);
-            glVertex2f(i, 10.0f * scale);
+        for (float i = (float) (X_MIN * scale); i <= X_MAX * scale; i += 1f * scale) {
+            glVertex2f(i, (float) (Y_MIN * scale));
+            glVertex2f(i, (float) (Y_MAX * scale));
         }
 
         // osa Y a X
         glColor3f(1f, 1f, 1f);
-        glVertex2f(-10 * scale, 0);
-        glVertex2f(10 * scale, 0);
+        glVertex2f((float) (X_MIN * scale), 0);
+        glVertex2f((float) (X_MAX * scale), 0);
 
-        glVertex2f(0, 10 * scale);
-        glVertex2f(0, -10 * scale);
-
-        // glColor3f(0.5f, 0.5f, 0.5f);
+        glVertex2f(0, (float) (Y_MIN * scale));
+        glVertex2f(0, (float) (Y_MAX * scale));
 
         glEnd();
     }
@@ -264,10 +298,10 @@ public class Renderer extends AbstractRenderer {
 
         glBegin(GL_QUADS);
         glColor3f(1f, 1f, 1f);
-        glVertex2f(-0.7f, 0.7f);
-        glVertex2f(-0.3f, 0.7f);
-        glVertex2f(-0.3f, 0.6f);
-        glVertex2f(-0.7f, 0.6f);
+        glVertex2f(-7f, 7f);
+        glVertex2f(-3f, 7f);
+        glVertex2f(-3f, 6f);
+        glVertex2f(-7f, 6f);
         glEnd();
 
     }
@@ -281,6 +315,8 @@ public class Renderer extends AbstractRenderer {
         keyToCharMap.put(GLFW_KEY_KP_MULTIPLY, '*');
         keyToCharMap.put(GLFW_KEY_PERIOD, '.');
         keyToCharMap.put(GLFW_KEY_GRAVE_ACCENT, '^');
+        keyToCharMap.put(GLFW_KEY_LEFT_BRACKET, '(');
+        keyToCharMap.put(GLFW_KEY_RIGHT_BRACKET, ')');
 
         // Přidat čísla
         keyToCharMap.put(GLFW_KEY_0, '0');
@@ -313,7 +349,7 @@ public class Renderer extends AbstractRenderer {
         glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
         glBegin(GL_LINE_STRIP);
 
-        for (double x = -10; x <= 10d; x += 1d) {
+        for (double x = X_MIN; x <= X_MAX; x += 0.3d) {
             double y = quadraticFunction.value(x);
             glVertex2d(x, y);
         }
@@ -327,11 +363,26 @@ public class Renderer extends AbstractRenderer {
         glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
         glBegin(GL_LINE_STRIP);
 
-        for (double x = -10; x <= 10d; x += 1d) {
+        for (double x = X_MIN; x <= X_MAX; x += 1d) {
             double y = linearFunction.value(x);
             glVertex2d(x, y);
         }
         glEnd();
+    }
+
+    private void drawExponencial(double a, double b) {
+        ExponentialFunction exponentialFunction = new ExponentialFunction(a, b);
+
+        glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
+        glBegin(GL_LINE_STRIP);
+
+        for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
+            double y = exponentialFunction.value(x);
+            System.out.println(y);
+            glVertex2d(x, y);
+        }
+        glEnd();
+
     }
 
 }
