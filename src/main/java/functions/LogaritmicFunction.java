@@ -7,6 +7,8 @@ public class LogaritmicFunction implements UnivariateFunction {
     private double a;
     private double base;
 
+    public static final String regex = "^y\\s*=\\s*log_(\\d*\\.?\\d*)\\((\\d*\\.?\\d*)x\\)$";
+
     public LogaritmicFunction(double a, double base) {
         this.a = a;
         this.base = base;
@@ -14,6 +16,6 @@ public class LogaritmicFunction implements UnivariateFunction {
 
     @Override
     public double value(double x) {
-        return a*  Math.log(x) / Math.log(base);
+        return  Math.log(a * x) / Math.log(base);
     }
 }

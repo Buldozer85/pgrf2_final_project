@@ -2,6 +2,7 @@ package Renderers;
 
 import functions.ExponentialFunction;
 import functions.LinearFunction;
+import functions.LogaritmicFunction;
 import functions.QuadraticFunction;
 import global.AbstractRenderer;
 import lwjglutils.OGLTextRenderer;
@@ -10,6 +11,7 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.*;
+import transforms.Col;
 import transforms.Vec2D;
 
 import java.awt.*;
@@ -58,9 +60,11 @@ public class Renderer extends AbstractRenderer {
 
     private String text = "";
 
+
     public Renderer() {
         super();
        initKeys();
+
 
         glfwWindowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
@@ -122,6 +126,7 @@ public class Renderer extends AbstractRenderer {
                         isConfirmed = true;
 
                     } else {
+                        System.out.println(i);
                         if( keyToCharMap.containsKey(i)) {
                             text += keyToCharMap.get(i);
                         }
@@ -142,6 +147,7 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void display() {
+        System.out.println(width + " " + height);
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
         // Nastavení projekční matice
@@ -151,7 +157,7 @@ public class Renderer extends AbstractRenderer {
 
 
         initGrid();
-        drawInputs();
+        //drawInputs();
 
         if (!points.isEmpty()) {
             drawPoints();
@@ -248,9 +254,64 @@ public class Renderer extends AbstractRenderer {
             drawExponencial(a, b);
         }
 
+        Pattern patternLogaritmic = Pattern.compile(LogaritmicFunction.regex);
+        Matcher matcherLogaritmic = patternLogaritmic.matcher(text);
+
+        if(matcherLogaritmic.matches() && isConfirmed) {
+
+            double a;
+
+            if (matcherLogaritmic.group(1) == null || matcherLogaritmic.group(1).isEmpty()) {
+                a = 1.0;
+            } else {
+                String value = (matcherLogaritmic.group(1).replace(" ", ""));
+                if (matcherLogaritmic.group(1).toString().equals("-")) {
+                    a = -1.0;
+                } else {
+                    a = Double.parseDouble(value);
+                }
+            }
+
+            double b;
+
+            if (matcherLogaritmic.group(2) == null || matcherLogaritmic.group(2).isEmpty()) {
+                b = 0;
+            } else {
+                b = Double.parseDouble(matcherLogaritmic.group(2).replace(" ", ""));
+            }
+
+            drawLogaritmic(a, b);
+        }
+
 
         textRenderer.addStr2D(100, 80, text);
         textRenderer.draw();
+
+
+
+        textRenderer.setBackgroundColor(Color.black);
+        textRenderer.setColor(Color.white);
+       // textRenderer.addStr2D(width / 2 + 5, height / 2 + 20, "0");
+
+        int start = 0;
+
+        for(double x = X_MIN; x <= X_MAX; x++) {
+            textRenderer.addStr2D(start , height / 2 + 20, Integer.toString((int) x));
+            start += 29;
+        }
+
+        start = 0;
+
+        for(double y = Y_MAX; y >= Y_MIN; y--) {
+            if(y == 0) {
+                continue;
+            }
+            textRenderer.addStr2D(width / 2 + 10 , start, Integer.toString((int) y));
+            start += 22;
+        }
+
+
+
     }
 
     private void initGrid() {
@@ -317,6 +378,7 @@ public class Renderer extends AbstractRenderer {
         keyToCharMap.put(GLFW_KEY_GRAVE_ACCENT, '^');
         keyToCharMap.put(GLFW_KEY_LEFT_BRACKET, '(');
         keyToCharMap.put(GLFW_KEY_RIGHT_BRACKET, ')');
+        keyToCharMap.put(GLFW_KEY_SLASH, '_');
 
         // Přidat čísla
         keyToCharMap.put(GLFW_KEY_0, '0');
@@ -378,8 +440,25 @@ public class Renderer extends AbstractRenderer {
 
         for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
             double y = exponentialFunction.value(x);
-            System.out.println(y);
             glVertex2d(x, y);
+        }
+        glEnd();
+
+    }
+
+    private void drawLogaritmic(double a, double b) {
+        LogaritmicFunction logarithmicFunction = new LogaritmicFunction(a, b);
+
+        glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
+        glBegin(GL_LINE_STRIP);
+
+        for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
+
+            if (x > 0) { // Kontrola, zda je x kladné
+                double y = logarithmicFunction.value(x);
+                System.out.println("x:" + x + "y:" + y);
+                glVertex2d(x, y);
+            }
         }
         glEnd();
 
