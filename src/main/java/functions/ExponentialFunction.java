@@ -6,6 +6,9 @@ public class ExponentialFunction implements UnivariateFunction {
     private final double a; // Amplituda funkce
     private final double b; // Exponent
 
+    public static final int AMPLITUDE = 1;
+    public static final int EXPONENT = 2;
+
     public ExponentialFunction(double a, double b) {
         this.a = a;
         this.b = b;

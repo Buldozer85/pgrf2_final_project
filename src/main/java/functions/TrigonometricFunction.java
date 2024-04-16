@@ -11,7 +11,13 @@ public class TrigonometricFunction implements UnivariateFunction {
 
     private String type;
 
-    private static final String regex = "^\\s*y\\s*=\\s*([+-]?\\s*\\d*\\.?\\d*)\\s*\\*?\\s*(sin|cos)\\s*\\(\\s*([+-]?\\s*\\d*\\.?\\d*)\\s*\\*?\\s*x\\s*\\+?\\s*([+-]?\\s*\\d*\\.?\\d*)\\s*\\)\\s*([+-]?\\s*\\d+\\.?\\d*)?$";
+    public static final int AMPLITUDE = 1;
+    public static final int TYPE = 2;
+    public static final int FREQUENCY = 3;
+    public static final int PHASE_SHIFT = 4;
+    public static final int VERTICAL_SHIFT = 5;
+
+    public static final String regex = "^\\s*y\\s*=\\s*([+-]?\\s*\\d*\\.?\\d*)\\s*\\*?\\s*(sin|cos|tan|cot)\\s*\\(\\s*([+-]?\\s*\\d*\\.?\\d*)\\s*\\*?\\s*x\\s*\\+?\\s*([+-]?\\s*\\d*\\.?\\d*)\\s*\\)\\s*([+-]?\\s*\\d+\\.?\\d*)?$";
 
     public TrigonometricFunction(double amplitude, double frequency, double phaseShift, double verticalShift, String type) {
         this.amplitude = amplitude;
@@ -23,12 +29,13 @@ public class TrigonometricFunction implements UnivariateFunction {
 
     @Override
     public double value(double x) {
-        switch (type) {
-            case "sin":
-                return amplitude * Math.sin(frequency * x + phaseShift) + verticalShift;
-            case "cos":
-                return amplitude * Math.cos(frequency * x + phaseShift) + verticalShift;
-        }
-        return 0;
+        return switch (type) {
+            case "sin" -> amplitude * Math.sin(frequency * x + phaseShift) + verticalShift;
+            case "cos" -> amplitude * Math.cos(frequency * x + phaseShift) + verticalShift;
+            case "tan" -> amplitude * Math.tan(frequency * x + phaseShift) + verticalShift;
+            case "cot" -> amplitude / Math.tan(frequency * x + phaseShift) + verticalShift;
+            default -> throw new IllegalArgumentException("Unsupported trigonometric function: " + type);
+        };
     }
+
 }

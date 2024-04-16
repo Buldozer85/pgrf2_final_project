@@ -1,9 +1,6 @@
 package Renderers;
 
-import functions.ExponentialFunction;
-import functions.LinearFunction;
-import functions.LogaritmicFunction;
-import functions.QuadraticFunction;
+import functions.*;
 import global.AbstractRenderer;
 import lwjglutils.OGLTextRenderer;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
@@ -11,6 +8,7 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.*;
+import services.RegexService;
 import transforms.Col;
 import transforms.Vec2D;
 
@@ -86,7 +84,6 @@ public class Renderer extends AbstractRenderer {
                     double[] xPos = new double[1];
                     double[] yPos = new double[1];
                     glfwGetCursorPos(l, xPos, yPos);
-                    System.out.println(xPos[0]);
 
                     clickedX = (float) (20 * xPos[0] / width - 10);
                     clickedY = (float) (10 - 20 * yPos[0] / height);
@@ -128,7 +125,7 @@ public class Renderer extends AbstractRenderer {
                         isConfirmed = true;
 
                     } else {
-
+                        System.out.println(i);
                         if( keyToCharMap.containsKey(i)) {
                             text += keyToCharMap.get(i);
                         }
@@ -149,17 +146,14 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void display() {
-
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
         // Nastavení projekční matice
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrtho(X_MIN, X_MAX, Y_MIN, Y_MAX, Z_MIN, Z_MAX); // Upraveno rozsah osy y
-
-
+         glPointSize(5);
         initGrid();
-        //drawInputs();
 
         if (!points.isEmpty()) {
             drawPoints();
@@ -169,26 +163,8 @@ public class Renderer extends AbstractRenderer {
         Matcher matcher = pattern.matcher(text);
 
         if (matcher.matches() && isConfirmed) {
-            double a;
-
-            if (matcher.group(1) == null || matcher.group(1).isEmpty()) {
-                a = 1.0;
-            } else {
-                String value = (matcher.group(1).replace(" ", ""));
-                if(matcher.group(1).toString().equals("-")) {
-                    a = - 1.0;
-                } else {
-                    a = Double.parseDouble(value);
-                }
-            }
-
-            double b;
-
-            if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
-                b = 0;
-            } else {
-                b = Double.parseDouble(matcher.group(2).replace(" ", ""));
-            }
+            double a = Double.parseDouble(RegexService.extractGroupValue(matcher, LinearFunction.SLOPE, false));
+            double b = Double.parseDouble(RegexService.extractGroupValue(matcher, LinearFunction.INTERCEPT, true));
             drawLinear(a, b);
         }
 
@@ -196,34 +172,9 @@ public class Renderer extends AbstractRenderer {
         Matcher matcherQuadratic = patternQuadratic.matcher(text);
 
         if(matcherQuadratic.matches() && isConfirmed) {
-            double a;
-
-            if (matcherQuadratic.group(1) == null || matcherQuadratic.group(1).isEmpty()) {
-                a = 1.0;
-            } else {
-                String value = (matcherQuadratic.group(1).replace(" ", ""));
-                if(matcherQuadratic.group(1).toString().equals("-")) {
-                    a = - 1.0;
-                } else {
-                    a = Double.parseDouble(value);
-                }
-            }
-
-            double b;
-
-            if (matcherQuadratic.group(2) == null || matcherQuadratic.group(2).isEmpty()) {
-                b = 0;
-            } else {
-                b = Double.parseDouble(matcherQuadratic.group(2).replace(" ", ""));
-            }
-
-            double c;
-
-            if (matcherQuadratic.group(3) == null || matcherQuadratic.group(3).isEmpty()) {
-                c = 0;
-            } else {
-                c = Double.parseDouble(matcherQuadratic.group(3).replace(" ", ""));
-            }
+            double a = Double.parseDouble(RegexService.extractGroupValue(matcherQuadratic, QuadraticFunction.QUADRATIC_COEFFICIENT, false));
+            double b = Double.parseDouble(RegexService.extractGroupValue(matcherQuadratic, QuadraticFunction.LINEAR_COEFFICIENT, true));
+            double c = Double.parseDouble(RegexService.extractGroupValue(matcherQuadratic, QuadraticFunction.CONSTANT_COEFFICIENT, true));
 
             drawQuadratic(a, b, c);
         }
@@ -232,27 +183,8 @@ public class Renderer extends AbstractRenderer {
         Matcher matcherExponencial = patternExponencial.matcher(text);
 
         if(matcherExponencial.matches() && isConfirmed) {
-            double a;
-
-            if (matcherExponencial.group(1) == null || matcherExponencial.group(1).isEmpty()) {
-                a = 1.0;
-            } else {
-                String value = (matcherExponencial.group(1).replace(" ", ""));
-                if(matcherExponencial.group(1).toString().equals("-")) {
-                    a = - 1.0;
-                } else {
-                    a = Double.parseDouble(value);
-                }
-            }
-
-            double b;
-
-            if (matcherExponencial.group(2) == null || matcherExponencial.group(2).isEmpty()) {
-                b = 0;
-            } else {
-                b = Double.parseDouble(matcherExponencial.group(2).replace(" ", ""));
-            }
-
+            double a = Double.parseDouble(RegexService.extractGroupValue(matcherExponencial, ExponentialFunction.AMPLITUDE, false));
+            double b = Double.parseDouble(RegexService.extractGroupValue(matcherExponencial, ExponentialFunction.EXPONENT, true));
             drawExponencial(a, b);
         }
 
@@ -260,59 +192,31 @@ public class Renderer extends AbstractRenderer {
         Matcher matcherLogaritmic = patternLogaritmic.matcher(text);
 
         if(matcherLogaritmic.matches() && isConfirmed) {
-
-            double a;
-
-            if (matcherLogaritmic.group(1) == null || matcherLogaritmic.group(1).isEmpty()) {
-                a = 1.0;
-            } else {
-                String value = (matcherLogaritmic.group(1).replace(" ", ""));
-                if (matcherLogaritmic.group(1).toString().equals("-")) {
-                    a = -1.0;
-                } else {
-                    a = Double.parseDouble(value);
-                }
-            }
-
-            double b;
-
-            if (matcherLogaritmic.group(2) == null || matcherLogaritmic.group(2).isEmpty()) {
-                b = 0;
-            } else {
-                b = Double.parseDouble(matcherLogaritmic.group(2).replace(" ", ""));
-            }
-
+            double a = Double.parseDouble(RegexService.extractGroupValue(matcherLogaritmic, LogaritmicFunction.AMPLITUDE, false));
+            double b = Double.parseDouble(RegexService.extractGroupValue(matcherLogaritmic, LogaritmicFunction.BASE, true));
             drawLogaritmic(a, b);
         }
 
+        Pattern patternTrigonometric = Pattern.compile(TrigonometricFunction.regex);
+        Matcher matcherTrigonometric = patternTrigonometric.matcher(text);
+
+        if(matcherTrigonometric.matches() && isConfirmed) {
+            double a = Double.parseDouble(RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.AMPLITUDE, false));
+            double f = Double.parseDouble(RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.FREQUENCY, false));
+            double p = Double.parseDouble(RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.PHASE_SHIFT, true));
+            double v = Double.parseDouble(RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.VERTICAL_SHIFT, true));
+
+            String type = RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.TYPE, false);
+
+            drawTrigonometric(a, f, p, v, type);
+        }
+
+        AbsoluteLinearFunction absoluteLinearFunction = new AbsoluteLinearFunction("||x+1| + 2|");
+
+        System.out.println(absoluteLinearFunction.value(1));
 
         textRenderer.addStr2D(100, 80, text);
-        textRenderer.draw();
-
-
-
-        textRenderer.setBackgroundColor(Color.black);
-        textRenderer.setColor(Color.white);
-       // textRenderer.addStr2D(width / 2 + 5, height / 2 + 20, "0");
-
-        int start = 0;
-
-        for(double x = X_MIN; x <= X_MAX; x++) {
-            textRenderer.addStr2D(start , height / 2 + 20, Integer.toString((int) x));
-            start += width / 20;
-        }
-
-        start = 0;
-
-        for(double y = Y_MAX; y >= Y_MIN; y--) {
-            if(y == 0) {
-                continue;
-            }
-            textRenderer.addStr2D(width / 2 + 10 , start, Integer.toString((int) y));
-            start += height / 19;
-        }
-
-
+        initNumbers();
 
     }
 
@@ -381,6 +285,7 @@ public class Renderer extends AbstractRenderer {
         keyToCharMap.put(GLFW_KEY_LEFT_BRACKET, '(');
         keyToCharMap.put(GLFW_KEY_RIGHT_BRACKET, ')');
         keyToCharMap.put(GLFW_KEY_SLASH, '_');
+        keyToCharMap.put(GLFW_KEY_WORLD_2, '|');
 
         // Přidat čísla
         keyToCharMap.put(GLFW_KEY_0, '0');
@@ -464,6 +369,54 @@ public class Renderer extends AbstractRenderer {
         }
         glEnd();
 
+    }
+
+    private void drawTrigonometric(double a, double f, double p, double v, String type) {
+        TrigonometricFunction trigonometricFunction = new TrigonometricFunction(a, f, p, v, type);
+
+        glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
+        glBegin(GL_LINE_STRIP);
+
+        double lastY = trigonometricFunction.value(X_MIN); // Počáteční hodnota Y pro první bod
+        boolean isFirstPoint = true; // Proměnná pro kontrolu, jestli se jedná o první bod nové periody
+
+        for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
+            double y = trigonometricFunction.value(x);
+
+            // Pokud se přesunete do nové periody, začněte novou úsečku
+            if (y * lastY < 0 && !isFirstPoint) {
+                glEnd();
+                glBegin(GL_LINE_STRIP);
+            }
+
+            glVertex2d(x, y);
+            lastY = y;
+            isFirstPoint = false;
+        }
+
+        glEnd();
+    }
+
+    private void initNumbers() {
+        textRenderer.setBackgroundColor(Color.black);
+        textRenderer.setColor(Color.white);
+
+        int start = 0;
+
+        for(double x = X_MIN; x <= X_MAX; x++) {
+            textRenderer.addStr2D(start , height / 2 + 20, Integer.toString((int) x));
+            start += width / 20;
+        }
+
+        start = 0;
+
+        for(double y = Y_MAX; y >= Y_MIN; y--) {
+            if(y == 0) {
+                continue;
+            }
+            textRenderer.addStr2D(width / 2 + 10 , start, Integer.toString((int) y));
+            start += height / 19;
+        }
     }
 
 }
