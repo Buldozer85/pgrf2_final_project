@@ -13,7 +13,7 @@ public class AbsoluteLinearFunction implements UnivariateFunction {
     private Expression expression;
 
     public AbsoluteLinearFunction(String expression) {
-        System.out.println(FunctionService.replaceAbsExpression(expression));
+     //   System.out.println(FunctionService.replaceAbsExpression(expression));
 /*        this.expression = new ExpressionBuilder(FunctionService.replaceAbsExpression(expression))
                 .variables("x")
                 .build();*/

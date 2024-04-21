@@ -211,9 +211,9 @@ public class Renderer extends AbstractRenderer {
             drawTrigonometric(a, f, p, v, type);
         }
 
-        AbsoluteLinearFunction absoluteLinearFunction = new AbsoluteLinearFunction("||x+1| + 2|");
+       // AbsoluteLinearFunction absoluteLinearFunction = new AbsoluteLinearFunction("||x+1| + 2|");
 
-        System.out.println(absoluteLinearFunction.value(1));
+      //  System.out.println(absoluteLinearFunction.value(1));
 
         textRenderer.addStr2D(100, 80, text);
         initNumbers();
