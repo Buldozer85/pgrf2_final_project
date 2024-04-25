@@ -6,17 +6,18 @@ import java.util.regex.Pattern;
 
 public class FunctionService {
     public static String replaceAbsExpression(String expression) {
-        int startPos = expression.lastIndexOf('|');
-        while (startPos >= 0) {
-            int endPos = expression.indexOf('|', startPos + 1);
-            if (endPos == -1) {
-                throw new IllegalArgumentException("Nesprávně uzavřené svislé čáry.");
-            }
-            String innerExpression = expression.substring(startPos + 1, endPos);
+        String regex = "\\|([^|]+?)\\|";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(expression);
+
+        // Nahrazení všech výskytů výrazů mezi svislými čarami za abs()
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String innerExpression = matcher.group(1);
             String absExpression = "abs(" + innerExpression + ")";
-            expression = expression.substring(0, startPos) + absExpression + expression.substring(endPos + 1);
-            startPos = expression.lastIndexOf('|', startPos - 1);
+            matcher.appendReplacement(sb, absExpression);
         }
-        return expression;
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }

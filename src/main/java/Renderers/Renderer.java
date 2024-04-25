@@ -209,11 +209,10 @@ public class Renderer extends AbstractRenderer {
             String type = RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.TYPE, false);
 
             drawTrigonometric(a, f, p, v, type);
+        } else if (isConfirmed) {
+          drawAbsolute();
         }
 
-       // AbsoluteLinearFunction absoluteLinearFunction = new AbsoluteLinearFunction("||x+1| + 2|");
-
-      //  System.out.println(absoluteLinearFunction.value(1));
 
         textRenderer.addStr2D(100, 80, text);
         initNumbers();
@@ -286,6 +285,7 @@ public class Renderer extends AbstractRenderer {
         keyToCharMap.put(GLFW_KEY_RIGHT_BRACKET, ')');
         keyToCharMap.put(GLFW_KEY_SLASH, '_');
         keyToCharMap.put(GLFW_KEY_WORLD_2, '|');
+        keyToCharMap.put(GLFW_KEY_P, '+');
 
         // Přidat čísla
         keyToCharMap.put(GLFW_KEY_0, '0');
@@ -394,6 +394,24 @@ public class Renderer extends AbstractRenderer {
             isFirstPoint = false;
         }
 
+        glEnd();
+    }
+
+    private void drawAbsolute() {
+        String expression = "";
+
+        if (text.contains("=")) {
+            String[] parts = text.split("=", 2);
+            expression = parts[1];
+        }
+
+        AbsoluteLinearFunction absoluteLinearFunction = new AbsoluteLinearFunction(expression);
+
+        glBegin(GL_LINE_STRIP);
+        glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
+        for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
+            glVertex2f((float) x, (float) absoluteLinearFunction.value(x));
+        }
         glEnd();
     }
 
