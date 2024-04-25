@@ -1,8 +1,9 @@
 package functions;
 
+import interfaces.FunctionInterface;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
-public class ExponentialFunction implements UnivariateFunction {
+public class ExponentialFunction implements FunctionInterface {
     private final double a; // Amplituda funkce
     private final double b; // Exponent
 

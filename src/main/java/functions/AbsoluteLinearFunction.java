@@ -1,10 +1,10 @@
 package functions;
+import interfaces.FunctionInterface;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
-import org.apache.commons.math3.analysis.UnivariateFunction;
 import services.FunctionService;
 
-public class AbsoluteLinearFunction implements UnivariateFunction {
+public class AbsoluteLinearFunction implements FunctionInterface {
 
     private Expression expression;
 

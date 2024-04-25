@@ -1,8 +1,9 @@
 package functions;
 
+import interfaces.FunctionInterface;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
-public class LinearFunction implements UnivariateFunction {
+public class LinearFunction implements FunctionInterface {
     private final double slope;
     private final double intercept;
 

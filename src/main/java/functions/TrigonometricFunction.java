@@ -1,8 +1,9 @@
 package functions;
 
+import interfaces.FunctionInterface;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
-public class TrigonometricFunction implements UnivariateFunction {
+public class TrigonometricFunction implements FunctionInterface {
 
     private double amplitude;
     private double frequency;

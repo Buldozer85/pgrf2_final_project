@@ -1,8 +1,9 @@
 package functions;
 
+import interfaces.FunctionInterface;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
-public class QuadraticFunction implements UnivariateFunction {
+public class QuadraticFunction implements FunctionInterface {
 
     private double a;
     private double b;
