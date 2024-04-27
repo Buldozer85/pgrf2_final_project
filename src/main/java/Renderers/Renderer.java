@@ -226,24 +226,24 @@ public class Renderer extends AbstractRenderer {
         glColor3f(0.2f, 0.2f, 0.2f);
 
         // vodorovné čáry mřížky
-        for (float i = (float) (Y_MIN * scale); i <= Y_MAX * scale; i += 1f * scale) {
-            glVertex2f((float) (X_MIN * scale), i);
-            glVertex2f((float) (X_MAX * scale), i);
+        for (double i = Y_MIN * scale; i <= Y_MAX * scale; i += 1d * scale) {
+            glVertex2d(X_MIN * scale, i);
+            glVertex2d(X_MAX * scale, i);
         }
 
         // svislé čáry mřížky
-        for (float i = (float) (X_MIN * scale); i <= X_MAX * scale; i += 1f * scale) {
-            glVertex2f(i, (float) (Y_MIN * scale));
-            glVertex2f(i, (float) (Y_MAX * scale));
+        for (double i = X_MIN * scale; i <= X_MAX * scale; i += 1d * scale) {
+            glVertex2d(i, Y_MIN * scale);
+            glVertex2d(i, Y_MAX * scale);
         }
 
         // osa Y a X
         glColor3f(1f, 1f, 1f);
-        glVertex2f((float) (X_MIN * scale), 0);
-        glVertex2f((float) (X_MAX * scale), 0);
+        glVertex2d( X_MIN * scale, 0);
+        glVertex2d(X_MAX * scale, 0);
 
-        glVertex2f(0, (float) (Y_MIN * scale));
-        glVertex2f(0, (float) (Y_MAX * scale));
+        glVertex2d(0,Y_MIN * scale);
+        glVertex2d(0,Y_MAX * scale);
 
         glEnd();
     }
@@ -253,7 +253,7 @@ public class Renderer extends AbstractRenderer {
         glColor3f(1f, 0, 0);
 
         for (Vec2D point : points) {
-            glVertex2f((float) point.getX(), (float) point.getY());
+            glVertex2d(point.getX(), point.getY());
         }
 
 
@@ -410,7 +410,7 @@ public class Renderer extends AbstractRenderer {
         glBegin(GL_LINE_STRIP);
         glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
         for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
-            glVertex2f((float) x, (float) absoluteLinearFunction.value(x));
+            glVertex2d(x, absoluteLinearFunction.value(x));
         }
         glEnd();
     }
