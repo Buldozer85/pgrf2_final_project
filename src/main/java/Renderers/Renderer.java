@@ -3,19 +3,15 @@ package Renderers;
 import functions.*;
 import global.AbstractRenderer;
 import lwjglutils.OGLTextRenderer;
-import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.*;
 import services.RegexService;
-import transforms.Col;
 import transforms.Vec2D;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -44,25 +40,26 @@ public class Renderer extends AbstractRenderer {
     private static Map<Integer, Character> keyToCharMap = new HashMap<>();
 
     private final double X_MIN = -10.0;
+
     private final double X_MAX = 10.0;
 
     private final double Y_MIN = -10.0;
+
     private final double Y_MAX = 10.0;
 
     private final double Z_MIN = -10.0;
+
     private final double Z_MAX = 10.0;
+
     private final double STEP = 0.1;
 
     private boolean isConfirmed = false;
 
-
     private String text = "";
-
 
     public Renderer() {
         super();
        initKeys();
-
 
         glfwWindowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
@@ -89,11 +86,9 @@ public class Renderer extends AbstractRenderer {
                     clickedY = (float) (10 - 20 * yPos[0] / height);
 
                     points.add(new Vec2D(clickedX, clickedY));
-
                 }
             }
-        }; //glfwMouseButtonCallback do nothing
-
+        };
 
         glfwScrollCallback = new GLFWScrollCallback() {
             @Override
@@ -125,11 +120,9 @@ public class Renderer extends AbstractRenderer {
                         isConfirmed = true;
 
                     } else {
-                        System.out.println(i);
                         if( keyToCharMap.containsKey(i)) {
                             text += keyToCharMap.get(i);
                         }
-
                     }
                 }
             }
@@ -152,7 +145,7 @@ public class Renderer extends AbstractRenderer {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrtho(X_MIN, X_MAX, Y_MIN, Y_MAX, Z_MIN, Z_MAX); // Upraveno rozsah osy y
-         glPointSize(5);
+        glPointSize(5);
         initGrid();
 
         if (!points.isEmpty()) {
@@ -212,16 +205,20 @@ public class Renderer extends AbstractRenderer {
         } else if (isConfirmed) {
           drawAbsolute();
         }
+        textRenderer.addStr2D(10, 180, "Začněte psát funkci ve tvaru: y=\n");
+        textRenderer.addStr2D(10, 210, "Potvrdíte stisknutím enter");
+        textRenderer.addStr2D(10, 240, "Funkce:");
+        textRenderer.addStr2D(60, 240, text);
 
-
-        textRenderer.addStr2D(100, 80, text);
+        textRenderer.addStr2D(10, 20, "Logaritmická funkce: y=log_a(x)\n");
+        textRenderer.addStr2D(10, 50,  "Kvadratická funkce: y=x^2...\n");
+        textRenderer.addStr2D(10, 80,    "Exponenciální funkce y=e^(2x)");
         initNumbers();
 
     }
 
     private void initGrid() {
         glBegin(GL_LINES);
-
 
         glColor3f(0.2f, 0.2f, 0.2f);
 
@@ -255,7 +252,6 @@ public class Renderer extends AbstractRenderer {
         for (Vec2D point : points) {
             glVertex2d(point.getX(), point.getY());
         }
-
 
         glEnd();
     }
@@ -308,8 +304,6 @@ public class Renderer extends AbstractRenderer {
         keyToCharMap.put(GLFW_KEY_KP_7, '7');
         keyToCharMap.put(GLFW_KEY_KP_8, '8');
         keyToCharMap.put(GLFW_KEY_KP_9, '9');
-
-
     }
 
     private void drawQuadratic(double a, double  b, double c) {
@@ -326,7 +320,6 @@ public class Renderer extends AbstractRenderer {
     }
 
     private void drawLinear(double a, double b) {
-
         LinearFunction linearFunction = new LinearFunction(a, b);
 
         glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
@@ -360,7 +353,6 @@ public class Renderer extends AbstractRenderer {
         glBegin(GL_LINE_STRIP);
 
         for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
-
             if (x > 0) { // Kontrola, zda je x kladné
                 double y = logarithmicFunction.value(x);
 
@@ -433,7 +425,7 @@ public class Renderer extends AbstractRenderer {
                 continue;
             }
             textRenderer.addStr2D(width / 2 + 10 , start, Integer.toString((int) y));
-            start += height / 19;
+            start += height / 18;
         }
     }
 

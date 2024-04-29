@@ -1,5 +1,5 @@
 package interfaces;
 
 public interface FunctionInterface {
-    public double value(double x);
+    double value(double x);
 }
