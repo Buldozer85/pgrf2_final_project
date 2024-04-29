@@ -3,20 +3,14 @@ package Renderers;
 import functions.*;
 import global.AbstractRenderer;
 import lwjglutils.OGLTextRenderer;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.*;
 import services.RegexService;
 import transforms.Vec2D;
-
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -24,20 +18,16 @@ import static org.lwjgl.opengl.GL11.*;
 /**
  * Simple scene rendering
  *
- * @author PGRF FIM UHK
+ * @author PGRF FIM UHK, Tomáš Dvořák
  * @version 3.1
  * @since 2020-01-20
  */
 public class Renderer extends AbstractRenderer {
 
-    private float scale = 1.0f;
     private float clickedX = -1;
     private float clickedY = -1;
 
-
     private ArrayList<Vec2D> points = new ArrayList<>();
-
-    private static Map<Integer, Character> keyToCharMap = new HashMap<>();
 
     private final double X_MIN = -10.0;
 
@@ -51,15 +41,12 @@ public class Renderer extends AbstractRenderer {
 
     private final double Z_MAX = 10.0;
 
-    private final double STEP = 0.1;
-
     private boolean isConfirmed = false;
 
     private String text = "";
 
     public Renderer() {
         super();
-       initKeys();
 
         glfwWindowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
@@ -90,19 +77,9 @@ public class Renderer extends AbstractRenderer {
             }
         };
 
-        glfwScrollCallback = new GLFWScrollCallback() {
-            @Override
-            public void invoke(long window, double dx, double dy) {
-                scale += dy * 0.1f;
-            }
-        };
+        glfwScrollCallback = null;
 
-        glfwCursorPosCallback = new GLFWCursorPosCallback() {
-            @Override
-            public void invoke(long l, double v, double v1) {
-                //
-            }
-        };
+        glfwCursorPosCallback = null;
 
         glfwKeyCallback = new GLFWKeyCallback() {
             @Override
@@ -113,20 +90,23 @@ public class Renderer extends AbstractRenderer {
                     if (i == GLFW_KEY_BACKSPACE && text.length() > 0) {
                         isConfirmed = false;
                         text = text.substring(0, text.length() - 1); // Smazání posledního znaku
-                    } else if (i >= GLFW_KEY_A && i <= GLFW_KEY_Z) {
-                        char character = (char) ('a' + (i - GLFW_KEY_A)); // Převod kódu klávesy na znak
-                        text += character;
                     } else if (i == GLFW_KEY_ENTER) {
                         isConfirmed = true;
 
-                    } else {
-                        if( keyToCharMap.containsKey(i)) {
-                            text += keyToCharMap.get(i);
-                        }
                     }
                 }
             }
         };
+
+
+        glfwCharCallback = new GLFWCharCallback() {
+
+            @Override
+            public void invoke(long l, int i) {
+                text += Character.toString((char) i);
+            }
+        };
+
     }
 
     @Override
@@ -223,24 +203,24 @@ public class Renderer extends AbstractRenderer {
         glColor3f(0.2f, 0.2f, 0.2f);
 
         // vodorovné čáry mřížky
-        for (double i = Y_MIN * scale; i <= Y_MAX * scale; i += 1d * scale) {
-            glVertex2d(X_MIN * scale, i);
-            glVertex2d(X_MAX * scale, i);
+        for (double i = Y_MIN; i <= Y_MAX; i += 1d) {
+            glVertex2d(X_MIN, i);
+            glVertex2d(X_MAX, i);
         }
 
         // svislé čáry mřížky
-        for (double i = X_MIN * scale; i <= X_MAX * scale; i += 1d * scale) {
-            glVertex2d(i, Y_MIN * scale);
-            glVertex2d(i, Y_MAX * scale);
+        for (double i = X_MIN; i <= X_MAX; i += 1d) {
+            glVertex2d(i, Y_MIN);
+            glVertex2d(i, Y_MAX);
         }
 
         // osa Y a X
         glColor3f(1f, 1f, 1f);
-        glVertex2d( X_MIN * scale, 0);
-        glVertex2d(X_MAX * scale, 0);
+        glVertex2d( X_MIN, 0);
+        glVertex2d(X_MAX, 0);
 
-        glVertex2d(0,Y_MIN * scale);
-        glVertex2d(0,Y_MAX * scale);
+        glVertex2d(0,Y_MIN);
+        glVertex2d(0,Y_MAX);
 
         glEnd();
     }
@@ -256,55 +236,7 @@ public class Renderer extends AbstractRenderer {
         glEnd();
     }
 
-    private void drawInputs() {
 
-        glBegin(GL_QUADS);
-        glColor3f(1f, 1f, 1f);
-        glVertex2f(-7f, 7f);
-        glVertex2f(-3f, 7f);
-        glVertex2f(-3f, 6f);
-        glVertex2f(-7f, 6f);
-        glEnd();
-
-    }
-
-    private void initKeys()
-    {
-        keyToCharMap.put(GLFW_KEY_EQUAL, '=');
-        keyToCharMap.put(GLFW_KEY_MINUS, '-');
-        keyToCharMap.put(GLFW_KEY_KP_ADD, '+');
-        keyToCharMap.put(GLFW_KEY_KP_SUBTRACT, '-');
-        keyToCharMap.put(GLFW_KEY_KP_MULTIPLY, '*');
-        keyToCharMap.put(GLFW_KEY_PERIOD, '.');
-        keyToCharMap.put(GLFW_KEY_GRAVE_ACCENT, '^');
-        keyToCharMap.put(GLFW_KEY_LEFT_BRACKET, '(');
-        keyToCharMap.put(GLFW_KEY_RIGHT_BRACKET, ')');
-        keyToCharMap.put(GLFW_KEY_SLASH, '_');
-        keyToCharMap.put(GLFW_KEY_WORLD_2, '|');
-        keyToCharMap.put(GLFW_KEY_P, '+');
-
-        // Přidat čísla
-        keyToCharMap.put(GLFW_KEY_0, '0');
-        keyToCharMap.put(GLFW_KEY_1, '1');
-        keyToCharMap.put(GLFW_KEY_2, '2');
-        keyToCharMap.put(GLFW_KEY_3, '3');
-        keyToCharMap.put(GLFW_KEY_4, '4');
-        keyToCharMap.put(GLFW_KEY_5, '5');
-        keyToCharMap.put(GLFW_KEY_6, '6');
-        keyToCharMap.put(GLFW_KEY_7, '7');
-        keyToCharMap.put(GLFW_KEY_8, '8');
-        keyToCharMap.put(GLFW_KEY_9, '9');
-        keyToCharMap.put(GLFW_KEY_KP_0, '0');
-        keyToCharMap.put(GLFW_KEY_KP_1, '1');
-        keyToCharMap.put(GLFW_KEY_KP_2, '2');
-        keyToCharMap.put(GLFW_KEY_KP_3, '3');
-        keyToCharMap.put(GLFW_KEY_KP_4, '4');
-        keyToCharMap.put(GLFW_KEY_KP_5, '5');
-        keyToCharMap.put(GLFW_KEY_KP_6, '6');
-        keyToCharMap.put(GLFW_KEY_KP_7, '7');
-        keyToCharMap.put(GLFW_KEY_KP_8, '8');
-        keyToCharMap.put(GLFW_KEY_KP_9, '9');
-    }
 
     private void drawQuadratic(double a, double  b, double c) {
         QuadraticFunction quadraticFunction = new QuadraticFunction(a, b, c);
@@ -428,5 +360,4 @@ public class Renderer extends AbstractRenderer {
             start += height / 18;
         }
     }
-
 }

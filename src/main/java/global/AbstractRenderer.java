@@ -116,6 +116,13 @@ public abstract class AbstractRenderer {
 
     };
 
+    protected GLFWCharCallback glfwCharCallback =  new GLFWCharCallback() {
+        @Override
+        public void invoke(long window, int codepoint) {
+            System.out.println(Character.toString(codepoint));
+        }
+    };
+
     protected GLFWCursorPosCallback glfwCursorPosCallback = new GLFWCursorPosCallback() {
         @Override
         public void invoke(long window, double x, double y) {
@@ -148,6 +155,10 @@ public abstract class AbstractRenderer {
 
     public GLFWScrollCallback getGlfwScrollCallback() {
         return glfwScrollCallback;
+    }
+
+    public GLFWCharCallback getGlfwCharCallback() {
+        return glfwCharCallback;
     }
 
     public void dispose() {

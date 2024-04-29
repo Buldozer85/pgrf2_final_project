@@ -97,6 +97,7 @@ public class LwjglWindow {
 		glfwSetMouseButtonCallback(window, renderer.getGlfwMouseButtonCallback());
 		glfwSetCursorPosCallback(window, renderer.getGlfwCursorPosCallback());
 		glfwSetScrollCallback(window, renderer.getGlfwScrollCallback());
+		glfwSetCharCallback(window, renderer.getGlfwCharCallback());
 
 		if (DEBUG)
 			glfwSetErrorCallback(new GLFWErrorCallback() {
