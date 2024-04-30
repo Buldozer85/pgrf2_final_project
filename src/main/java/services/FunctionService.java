@@ -1,5 +1,7 @@
 package services;
 
+import helpers.TextHelper;
+
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,5 +21,14 @@ public class FunctionService {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    public static boolean hasAbsExpression(String expression) {
+        String regex = "\\|([^|]+?)\\|";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(expression);
+
+        return matcher.find() && (TextHelper.countSpecificChars(expression, '|') % 2 == 0);
     }
 }

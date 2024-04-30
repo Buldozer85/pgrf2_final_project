@@ -1,4 +1,4 @@
-import Renderers.Renderer;
+import renderers.Renderer;
 import global.LwjglWindow;
 
 

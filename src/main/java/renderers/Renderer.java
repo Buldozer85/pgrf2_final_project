@@ -1,10 +1,11 @@
-package Renderers;
+package renderers;
 
 import functions.*;
 import global.AbstractRenderer;
 import lwjglutils.OGLTextRenderer;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.*;
+import services.FunctionService;
 import services.RegexService;
 import transforms.Vec2D;
 import java.awt.*;
@@ -115,6 +116,8 @@ public class Renderer extends AbstractRenderer {
         textRenderer.setBackgroundColor(Color.WHITE);
         textRenderer.setColor(Color.BLACK);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        System.out.println(FunctionService.hasAbsExpression("||x+1| + 1"));
+
     }
 
     @Override
@@ -145,20 +148,22 @@ public class Renderer extends AbstractRenderer {
         Matcher matcherQuadratic = patternQuadratic.matcher(text);
 
         if(matcherQuadratic.matches() && isConfirmed) {
-            double a = Double.parseDouble(RegexService.extractGroupValue(matcherQuadratic, QuadraticFunction.QUADRATIC_COEFFICIENT, false));
-            double b = Double.parseDouble(RegexService.extractGroupValue(matcherQuadratic, QuadraticFunction.LINEAR_COEFFICIENT, true));
-            double c = Double.parseDouble(RegexService.extractGroupValue(matcherQuadratic, QuadraticFunction.CONSTANT_COEFFICIENT, true));
+            String expression = "";
 
-            drawQuadratic(a, b, c);
+            if (text.contains("=")) {
+                String[] parts = text.split("=", 2);
+                expression = parts[1];
+            }
+
+
+            drawQuadratic(expression);
         }
 
         Pattern patternExponencial = Pattern.compile(ExponentialFunction.regex);
         Matcher matcherExponencial = patternExponencial.matcher(text);
 
         if(matcherExponencial.matches() && isConfirmed) {
-            double a = Double.parseDouble(RegexService.extractGroupValue(matcherExponencial, ExponentialFunction.AMPLITUDE, false));
-            double b = Double.parseDouble(RegexService.extractGroupValue(matcherExponencial, ExponentialFunction.EXPONENT, true));
-            drawExponencial(a, b);
+            drawExponencial();
         }
 
         Pattern patternLogaritmic = Pattern.compile(LogaritmicFunction.regex);
@@ -182,9 +187,21 @@ public class Renderer extends AbstractRenderer {
             String type = RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.TYPE, false);
 
             drawTrigonometric(a, f, p, v, type);
-        } else if (isConfirmed) {
-          drawAbsolute();
+        } else if(isConfirmed) {
+            String expression = "";
+
+            if (text.contains("=")) {
+                String[] parts = text.split("=", 2);
+                expression = parts[1];
+            }
+
+            if (FunctionService.hasAbsExpression(expression)) {
+                drawAbsolute(expression);
+            }
+        } else {
+            isConfirmed = false;
         }
+
         textRenderer.addStr2D(10, 180, "Začněte psát funkci ve tvaru: y=\n");
         textRenderer.addStr2D(10, 210, "Potvrdíte stisknutím enter");
         textRenderer.addStr2D(10, 240, "Funkce:");
@@ -238,8 +255,8 @@ public class Renderer extends AbstractRenderer {
 
 
 
-    private void drawQuadratic(double a, double  b, double c) {
-        QuadraticFunction quadraticFunction = new QuadraticFunction(a, b, c);
+    private void drawQuadratic(String expression) {
+        QuadraticFunction quadraticFunction = new QuadraticFunction(expression);
 
         glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
         glBegin(GL_LINE_STRIP);
@@ -264,8 +281,8 @@ public class Renderer extends AbstractRenderer {
         glEnd();
     }
 
-    private void drawExponencial(double a, double b) {
-        ExponentialFunction exponentialFunction = new ExponentialFunction(a, b);
+    private void drawExponencial() {
+        ExponentialFunction exponentialFunction = new ExponentialFunction(text);
 
         glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
         glBegin(GL_LINE_STRIP);
@@ -321,13 +338,7 @@ public class Renderer extends AbstractRenderer {
         glEnd();
     }
 
-    private void drawAbsolute() {
-        String expression = "";
-
-        if (text.contains("=")) {
-            String[] parts = text.split("=", 2);
-            expression = parts[1];
-        }
+    private void drawAbsolute(String expression) {
 
         AbsoluteLinearFunction absoluteLinearFunction = new AbsoluteLinearFunction(expression);
 
