@@ -9,7 +9,7 @@ public class ExponentialFunction implements FunctionInterface {
     public static final int AMPLITUDE = 1;
     public static final int EXPONENT = 2;
 
-    private Expression expression;
+    private final Expression expression;
 
     public ExponentialFunction(String expression) {
         String expression1 = "";

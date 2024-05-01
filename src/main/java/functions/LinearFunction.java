@@ -1,23 +1,29 @@
 package functions;
 
 import interfaces.FunctionInterface;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 
 public class LinearFunction implements FunctionInterface {
-    private final double slope;
-    private final double intercept;
+    Expression expression;
 
-    public static final int SLOPE = 1;
-    public static final int INTERCEPT = 2;
+    public static final String regex = "^\\s*y\\s*=(\\s*[+-]?\\s*\\d*\\s*x?\\s*([+-]?\\s*\\d+\\s*)*|(\\s*[+-]?\\s*\\d+\\s*))$";
 
-    public static final String regex = "^\\s*y\\s*=\\s*([+-]?\\s*\\d*\\.?\\d*)\\s*\\*?\\s*x\\s*([+-]?\\s*\\d+\\.?\\d*)?\\s*$";
+    public LinearFunction(String expression) {
+        String expression1 = "";
 
-    public LinearFunction(double slope, double intercept) {
-        this.slope = slope;
-        this.intercept = intercept;
+        if (expression.contains("=")) {
+            String[] parts = expression.split("=", 2);
+            expression1 = parts[1];
+        }
+
+        this.expression = new ExpressionBuilder(expression1)
+                .variables("x")
+                .build();
     }
 
     @Override
     public double value(double x) {
-        return slope * x + intercept;
+        return this.expression.setVariable("x", x).evaluate();
     }
 }

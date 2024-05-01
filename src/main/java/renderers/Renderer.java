@@ -139,9 +139,8 @@ public class Renderer extends AbstractRenderer {
         Matcher matcher = pattern.matcher(text);
 
         if (matcher.matches() && isConfirmed) {
-            double a = Double.parseDouble(RegexService.extractGroupValue(matcher, LinearFunction.SLOPE, false));
-            double b = Double.parseDouble(RegexService.extractGroupValue(matcher, LinearFunction.INTERCEPT, true));
-            drawLinear(a, b);
+            System.out.println("xd");
+            drawLinear();
         }
 
         Pattern patternQuadratic = Pattern.compile(QuadraticFunction.regex);
@@ -154,7 +153,6 @@ public class Renderer extends AbstractRenderer {
                 String[] parts = text.split("=", 2);
                 expression = parts[1];
             }
-
 
             drawQuadratic(expression);
         }
@@ -268,8 +266,8 @@ public class Renderer extends AbstractRenderer {
         glEnd();
     }
 
-    private void drawLinear(double a, double b) {
-        LinearFunction linearFunction = new LinearFunction(a, b);
+    private void drawLinear() {
+        LinearFunction linearFunction = new LinearFunction(text);
 
         glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
         glBegin(GL_LINE_STRIP);
