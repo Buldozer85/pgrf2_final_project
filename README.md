@@ -2,6 +2,8 @@
 <a href="https://github.com/Buldozer85/pgrf2_final_project">GITHUB</a>\
 <a href="https://www.objecthunter.net/exp4j/">Knihovna EXP4J</a>
 
+## Tomáš Dvořák cv01 ##
+
 
 ## Základní ovládání ##
 
