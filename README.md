@@ -35,4 +35,6 @@ y=|logb(x,2)|
 ### Trigonometrické funkce ###
 y=sin|cos|tan|cot(x)..
 
+# Pro spuštění je nutná minimálně java 20 #
+
 
