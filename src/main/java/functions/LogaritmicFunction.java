@@ -10,7 +10,7 @@ public class LogaritmicFunction implements FunctionInterface {
     public static int AMPLITUDE = 1;
     public static int BASE = 2;
 
-    public static final String regex = "^y\\s*=\\s*log_(\\d*\\.?\\d*)\\((\\d*\\.?\\d*)x\\)$";
+    public static final String regex = "^y\\s*=\\s*log_(\\d*\\.?\\d*)+\\((\\d*\\.?\\d*)x\\)$";
 
     public LogaritmicFunction(double a, double base) {
         this.a = a;

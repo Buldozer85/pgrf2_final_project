@@ -3,15 +3,19 @@ package renderers;
 import functions.*;
 import global.AbstractRenderer;
 import lwjglutils.OGLTextRenderer;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.*;
 import services.FunctionService;
 import services.RegexService;
 import transforms.Vec2D;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -56,7 +60,7 @@ public class Renderer extends AbstractRenderer {
                     width = w;
                     height = h;
                 }
-                    textRenderer.resize(width, height);
+                textRenderer.resize(width, height);
             }
         };
 
@@ -98,8 +102,6 @@ public class Renderer extends AbstractRenderer {
                 }
             }
         };
-
-
         glfwCharCallback = new GLFWCharCallback() {
 
             @Override
@@ -116,8 +118,6 @@ public class Renderer extends AbstractRenderer {
         textRenderer.setBackgroundColor(Color.WHITE);
         textRenderer.setColor(Color.BLACK);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        System.out.println(FunctionService.hasAbsExpression("||x+1| + 1"));
-
     }
 
     @Override
@@ -139,14 +139,18 @@ public class Renderer extends AbstractRenderer {
         Matcher matcher = pattern.matcher(text);
 
         if (matcher.matches() && isConfirmed) {
-            System.out.println("xd");
-            drawLinear();
+            if (text.length() < 3) {
+                isConfirmed = false;
+            } else {
+                drawLinear();
+            }
+
         }
 
         Pattern patternQuadratic = Pattern.compile(QuadraticFunction.regex);
         Matcher matcherQuadratic = patternQuadratic.matcher(text);
 
-        if(matcherQuadratic.matches() && isConfirmed) {
+        if (matcherQuadratic.matches() && isConfirmed) {
             String expression = "";
 
             if (text.contains("=")) {
@@ -160,14 +164,14 @@ public class Renderer extends AbstractRenderer {
         Pattern patternExponencial = Pattern.compile(ExponentialFunction.regex);
         Matcher matcherExponencial = patternExponencial.matcher(text);
 
-        if(matcherExponencial.matches() && isConfirmed) {
+        if (matcherExponencial.matches() && isConfirmed) {
             drawExponencial();
         }
 
         Pattern patternLogaritmic = Pattern.compile(LogaritmicFunction.regex);
         Matcher matcherLogaritmic = patternLogaritmic.matcher(text);
 
-        if(matcherLogaritmic.matches() && isConfirmed) {
+        if (matcherLogaritmic.matches() && isConfirmed) {
             double a = Double.parseDouble(RegexService.extractGroupValue(matcherLogaritmic, LogaritmicFunction.AMPLITUDE, false));
             double b = Double.parseDouble(RegexService.extractGroupValue(matcherLogaritmic, LogaritmicFunction.BASE, true));
             drawLogaritmic(a, b);
@@ -176,7 +180,7 @@ public class Renderer extends AbstractRenderer {
         Pattern patternTrigonometric = Pattern.compile(TrigonometricFunction.regex);
         Matcher matcherTrigonometric = patternTrigonometric.matcher(text);
 
-        if(matcherTrigonometric.matches() && isConfirmed) {
+        if (matcherTrigonometric.matches() && isConfirmed) {
             double a = Double.parseDouble(RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.AMPLITUDE, false));
             double f = Double.parseDouble(RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.FREQUENCY, false));
             double p = Double.parseDouble(RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.PHASE_SHIFT, true));
@@ -185,16 +189,43 @@ public class Renderer extends AbstractRenderer {
             String type = RegexService.extractGroupValue(matcherTrigonometric, TrigonometricFunction.TYPE, false);
 
             drawTrigonometric(a, f, p, v, type);
-        } else if(isConfirmed) {
-            String expression = "";
+        } else if (isConfirmed && text.length() >= 3) {
+            String finalExpression = "";
 
             if (text.contains("=")) {
                 String[] parts = text.split("=", 2);
-                expression = parts[1];
+                finalExpression = parts[1];
             }
 
-            if (FunctionService.hasAbsExpression(expression)) {
-                drawAbsolute(expression);
+            if (FunctionService.hasAbsExpression(finalExpression)) {
+                if (finalExpression.contains("log_")) {
+                    isConfirmed = false;
+                    return;
+                }
+                if (finalExpression.contains("log(")) {
+                    isConfirmed = false;
+                    return;
+                }
+                drawAbsolute(finalExpression);
+            } else {
+                try {
+                    Expression expression = new ExpressionBuilder(finalExpression)
+                            .variables("x")
+                            .build();
+
+                    glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
+                    glBegin(GL_LINE_STRIP);
+
+                    for (double x = X_MIN; x <= X_MAX; x += 0.3d) {
+                        double y = expression.setVariable("x", x).evaluate();
+                        glVertex2d(x, y);
+                    }
+                    glEnd();
+
+                } catch (IllegalArgumentException e) {
+                    textRenderer.addStr2D(10, 270, "Použití neexistujícího výrazu!");
+                    isConfirmed = false;
+                }
             }
         } else {
             isConfirmed = false;
@@ -206,8 +237,9 @@ public class Renderer extends AbstractRenderer {
         textRenderer.addStr2D(60, 240, text);
 
         textRenderer.addStr2D(10, 20, "Logaritmická funkce: y=log_a(x)\n");
-        textRenderer.addStr2D(10, 50,  "Kvadratická funkce: y=x^2...\n");
-        textRenderer.addStr2D(10, 80,    "Exponenciální funkce y=e^(2x)");
+        textRenderer.addStr2D(10, 50, "Kvadratická funkce: y=x^2...\n");
+        textRenderer.addStr2D(10, 100, "Exponenciální funkce y=e^(2x)|a^(x)");
+        textRenderer.addStr2D(10, 120, "Trigonometrická funkce y=sin|cos|cot|tan(x)");
         initNumbers();
 
     }
@@ -231,11 +263,11 @@ public class Renderer extends AbstractRenderer {
 
         // osa Y a X
         glColor3f(1f, 1f, 1f);
-        glVertex2d( X_MIN, 0);
+        glVertex2d(X_MIN, 0);
         glVertex2d(X_MAX, 0);
 
-        glVertex2d(0,Y_MIN);
-        glVertex2d(0,Y_MAX);
+        glVertex2d(0, Y_MIN);
+        glVertex2d(0, Y_MAX);
 
         glEnd();
     }
@@ -250,7 +282,6 @@ public class Renderer extends AbstractRenderer {
 
         glEnd();
     }
-
 
 
     private void drawQuadratic(String expression) {
@@ -322,7 +353,6 @@ public class Renderer extends AbstractRenderer {
         for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
             double y = trigonometricFunction.value(x);
 
-            // Pokud se přesunete do nové periody, začněte novou úsečku
             if (y * lastY < 0 && !isFirstPoint) {
                 glEnd();
                 glBegin(GL_LINE_STRIP);
@@ -338,14 +368,19 @@ public class Renderer extends AbstractRenderer {
 
     private void drawAbsolute(String expression) {
 
-        AbsoluteLinearFunction absoluteLinearFunction = new AbsoluteLinearFunction(expression);
+        try {
+            AbsoluteLinearFunction absoluteLinearFunction = new AbsoluteLinearFunction(expression);
 
-        glBegin(GL_LINE_STRIP);
-        glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
-        for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
-            glVertex2d(x, absoluteLinearFunction.value(x));
+            glBegin(GL_LINE_STRIP);
+            glColor3f(1.0f, 0.0f, 0.0f); // Barva grafu
+            for (double x = X_MIN; x <= X_MAX; x += 0.1d) {
+                glVertex2d(x, absoluteLinearFunction.value(x));
+            }
+            glEnd();
+        } catch (IllegalArgumentException e) {
+            textRenderer.addStr2D(10, 270, "Použití neexistujícího výrazu!");
         }
-        glEnd();
+
     }
 
     private void initNumbers() {
@@ -354,18 +389,18 @@ public class Renderer extends AbstractRenderer {
 
         int start = 0;
 
-        for(double x = X_MIN; x <= X_MAX; x++) {
-            textRenderer.addStr2D(start , height / 2 + 20, Integer.toString((int) x));
+        for (double x = X_MIN; x <= X_MAX; x++) {
+            textRenderer.addStr2D(start, height / 2 + 20, Integer.toString((int) x));
             start += width / 20;
         }
 
         start = 0;
 
-        for(double y = Y_MAX; y >= Y_MIN; y--) {
-            if(y == 0) {
+        for (double y = Y_MAX; y >= Y_MIN; y--) {
+            if (y == 0) {
                 continue;
             }
-            textRenderer.addStr2D(width / 2 + 10 , start, Integer.toString((int) y));
+            textRenderer.addStr2D(width / 2 + 10, start, Integer.toString((int) y));
             start += height / 18;
         }
     }

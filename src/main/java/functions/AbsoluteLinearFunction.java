@@ -2,6 +2,7 @@ package functions;
 import interfaces.FunctionInterface;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
+import net.objecthunter.exp4j.function.Function;
 import services.FunctionService;
 
 public class AbsoluteLinearFunction implements FunctionInterface {
@@ -16,7 +17,15 @@ public class AbsoluteLinearFunction implements FunctionInterface {
             replacedExpression = "abs(" + replacedExpression.substring(1, replacedExpression.length() - 1) + ")";
         }
 
+        Function logb = new Function("logb", 2) {
+            @Override
+            public double apply(double... args) {
+                return Math.log(args[0]) / Math.log(args[1]);
+            }
+        };
+
         this.expression = new ExpressionBuilder(replacedExpression)
+                .function(logb)
                 .variables("x")
                 .build();
     }
