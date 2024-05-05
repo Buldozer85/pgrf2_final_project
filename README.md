@@ -1,4 +1,7 @@
 # Zobrazování matematických funkcí - projekt PGRF2 #
+<a href="https://github.com/Buldozer85/pgrf2_final_project">GITHUB</a>\
+<a href="https://www.objecthunter.net/exp4j/">Knihovna EXP4J</a>
+
 
 ## Základní ovládání ##
 
